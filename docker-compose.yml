@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-questfound}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-questfound_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-questfound}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-questfound}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-questfound}:${POSTGRES_PASSWORD:-questfound_secret}@db:5432/${POSTGRES_DB:-questfound}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-changeme_in_production}
+      EMAIL_SERVER: ${EMAIL_SERVER:-smtp://mailhog:1025}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@questfound.io}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed && node server.js"
+
+  mailhog:
+    image: mailhog/mailhog
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+volumes:
+  postgres_data:

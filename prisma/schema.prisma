@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Category {
+  TUBITAK
+  HACKATHON
+  STARTUP
+  AI_ML
+  DESIGN
+  OTHER
+}
+
+model Competition {
+  id             String   @id @default(cuid())
+  title          String
+  organization   String
+  description    String   @db.Text
+  category       Category @default(OTHER)
+  reward         String?
+  currency       String?  @default("USD")
+  deadline       DateTime?
+  applicationUrl String?
+  sourceUrl      String
+  country        String?  @default("International")
+  tags           String[]
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  savedBy       UserSavedCompetition[]
+  notifications UserNotification[]
+
+  @@index([category])
+  @@index([deadline])
+  @@index([isActive])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  emailVerified DateTime?
+  createdAt DateTime @default(now())
+
+  accounts      Account[]
+  sessions      Session[]
+  savedCompetitions UserSavedCompetition[]
+  notifications     UserNotification[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model UserSavedCompetition {
+  userId        String
+  competitionId String
+  savedAt       DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, competitionId])
+}
+
+model UserNotification {
+  id            String   @id @default(cuid())
+  userId        String
+  competitionId String
+  reminderDate  DateTime
+  sent          Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+}

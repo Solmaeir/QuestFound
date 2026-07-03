@@ -1,0 +1,32 @@
+{
+  "sources": [
+    {
+      "name": "devpost",
+      "base_url": "https://devpost.com",
+      "fetch_method": "dynamic",
+      "listing_urls": [
+        "https://devpost.com/hackathons?challenge_type[]=online&open_to[]=public"
+      ],
+      "notes": "JavaScript ile yükleniyor; Selenium gerekli. Kartlar lazy-load, scroll gerekiyor. Birden fazla fallback selector dene (article.hackathon-tile → a.tile-anchor → .hackathon-tile → [data-slug])."
+    },
+    {
+      "name": "tubitak",
+      "base_url": "https://www.tubitak.gov.tr",
+      "fetch_method": "static",
+      "listing_urls": [
+        "https://www.tubitak.gov.tr/tr/haber/arsiv?page=1",
+        "https://www.tubitak.gov.tr/tr/haber/arsiv?page=2"
+      ],
+      "notes": "Basit GET isteği yeterli, JS yok. Sayfalama var, şimdilik ilk 1-2 sayfa ile sınırlı. prize alanı her zaman boş."
+    },
+    {
+      "name": "teknofest",
+      "base_url": "https://teknofest.org",
+      "fetch_method": "static",
+      "listing_urls": [
+        "https://teknofest.org/tr/yarismalar"
+      ],
+      "notes": "Basit GET isteği yeterli. Tüm yarışmalar tek sayfada. Bağlantı metninin sonunda durum ifadesi var (Başvuru Tamamlandı / Başvuru Aşaması / Henüz Başlamadı) — bu ayrıştırılmalı. Aynı source_url birden fazla tekrarlayabilir, sadece ilk görülen tutulur."
+    }
+  ]
+}

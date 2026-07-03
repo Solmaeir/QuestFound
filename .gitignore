@@ -35,3 +35,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+scraper/__pycache__/
+scraper/adapters/__pycache__/
+
+# scraper outputs (tracked via data/.gitkeep; actual JSON excluded)
+data/*.json
+debug/
